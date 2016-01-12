@@ -1,0 +1,12 @@
+# Editor artifacts
+**.swp
+
+# NPM cruft
+node_modules
+**.log
+
+# Jetbrains IDE project files
+.idea
+
+# Build files
+dist
