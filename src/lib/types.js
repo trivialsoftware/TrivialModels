@@ -15,7 +15,7 @@ class BaseType
     constructor(options)
     {
         this.$isType = true;
-        this.options = options;
+        this.options = options || {};
 
         if(this.options.sanitize && _.isFunction(this.options.sanitize))
         {
@@ -25,6 +25,7 @@ class BaseType
 
     get(inst, key)
     {
+        console.log('inst:', inst);
         var val = inst.$values[key];
         if(val === undefined)
         {
@@ -34,9 +35,9 @@ class BaseType
         return val;
     } // end get
 
-    set(inst, val)
+    set(inst, key, val)
     {
-        inst.$values = val;
+        inst.$values[key] = val;
         inst.$dirty = true;
     } // end set
 

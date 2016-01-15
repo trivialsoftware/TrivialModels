@@ -15,13 +15,13 @@ class TrivialModel {
     constructor(initialData)
     {
         // Check to make sure we have a schema
-        if(!this.$schema)
+        if(!this.constructor.schema)
         {
             throw new Error("A schema must be set on the model.");
         } // end if
 
         // Check to make sure we have a driver
-        if(!this.$driver)
+        if(!this.constructor.driver)
         {
             throw new Error("A driver must be set on the model.");
         } // end if
@@ -46,14 +46,13 @@ class TrivialModel {
 
     $duplicate()
     {
-        var driver = this.constructor.driver;
-        return Promise.throw(errors.NotImplemented('$duplicate'));
-    } // end duplicate
+        return Promise.resolve(new this.constructor(this.$values));
+    } // end $duplicate
 
     $reload()
     {
         var driver = this.constructor.driver;
-        return driver.get(this.$pk)
+        return driver.get(this.$pk, this)
             .then((results) =>
             {
                 if(_.isArray(results))
@@ -73,12 +72,12 @@ class TrivialModel {
                     this.$dirty = false;
                 } // end if
             });
-    } // end reload
+    } // end $reload
 
     $validate()
     {
         var schema = this.constructor.schema;
-        return Promise.each(schema, (value, key) =>
+        return Promise.props(schema, (value, key) =>
             {
                 // We only run validation if it's a type from our type system.
                 if(value.$isType)
@@ -87,19 +86,56 @@ class TrivialModel {
                 } // end if
             })
             .then(() => true);
-    } // end validate
+    } // end $validate
 
     $save()
     {
         var driver = this.constructor.driver;
-        return Promise.throw(errors.NotImplemented('$save'));
-    } // end save
+        return this.$validate()
+            .then(() =>
+            {
+                return driver.set(this.$pk, this.$values, this)
+                    .then((id) =>
+                    {
+                        console.log('***id:', id);
+                        this.$values[this.constructor.pk] = id;
+                    })
+                    .then(() =>
+                    {
+                        return this;
+                    });
+            });
+    } // end $save
+
+    $delete()
+    {
+        if(this.$exists)
+        {
+        var pkFieldName = this.constructor.pk;
+        var driver = this.constructor.driver;
+
+        var query = {};
+        query[pkFieldName] = this.$pk;
+
+        // Remove this instance
+        return driver.remove(query, this)
+            .then(() =>
+            {
+                this.$pk = undefined;
+            });
+        }
+        else
+        {
+            return Promise.throw(new Error("Cannot delete a model that has not been saved yet!"));
+        } // end if
+    } // end $delete
 
     toJSON()
     {
         // Remove all keys that begin with `$`.
         function _filterObject(object)
         {
+            console.log('obj:', object);
             return _.transform(object, (results, value, key) =>
             {
                 if(_.isPlainObject(value))
@@ -108,6 +144,7 @@ class TrivialModel {
                 }
                 else if(!(typeof key === 'string' && key.charAt(0) === '$'))
                 {
+                    console.log('setting %s:%s', key, value);
                     results[key] = value;
                 } // end if
 
@@ -122,9 +159,23 @@ class TrivialModel {
     // Class API
     //------------------------------------------------------------------------------------------------------------------
 
+    static _makeModel(item)
+    {
+        // Return a new instance of this Model, populated with the data from the driver.
+        var inst = new this(item);
+
+        // The instance isn't dirty, as we've just loaded it from the DB.
+        inst.$dirty = false;
+
+        // The instance exists in the database. (Required for some drivers.)
+        inst.$exists = true;
+
+        return inst;
+    } // end makeModel
+
     static get(pk)
     {
-        return this.driver.get(pk)
+        return this.driver.get(pk, this)
             .then((results) =>
             {
                 if(_.isArray(results))
@@ -137,42 +188,42 @@ class TrivialModel {
                 }
                 else
                 {
-                    // Return a new instance of this Model, populated with the data from the driver.
-                    var inst = new this(results);
-
-                    // The instance isn't dirty, as we've just loaded it from the DB.
-                    inst.$dirty = false;
-
-                    // The instance exists in the database. (Required for some drivers.)
-                    inst.$exists = true;
-
-                    return inst;
+                    return this._makeModel(results);
                 } // end if
             });
     } // end get
 
     static all()
     {
-        return Promise.throw(errors.NotImplemented('[static] all'));
+        return this.driver.getAll(this)
+            .map((item) =>
+            {
+                return this._makeModel(item);
+            });
     } // end all
 
     static filter(predicate)
     {
-        console.log('[static] filter called');
-        return Promise.throw(errors.NotImplemented('[static] filter'));
+        return this.driver.filter(predicate, this)
+            .map((item) =>
+            {
+                return this._makeModel(item);
+            });
     } // end filter
 
-    static remove()
+    static remove(predicate)
     {
-        console.log('[static] remove called');
-        return Promise.throw(errors.NotImplemented('[static] remove'));
+        return this.driver.remove(predicate, this);
     } // end remove
 
     static removeAll()
     {
-        console.log('[static] removeAll called');
-        return Promise.throw(errors.NotImplemented('[static] removeAll'));
+        return this.driver.removeAll(this);
     } // end removeAll
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Model Class creation API
+    //------------------------------------------------------------------------------------------------------------------
 
     static setPrimaryKey(pk)
     {
@@ -190,8 +241,9 @@ class TrivialModel {
             {
                 // Define the getter/setters for the model fields
                 Object.defineProperty(this.prototype, key, {
-                    get: () => { return value.get(this, key); },
-                    set: (val) => { value.set(this, val); }
+                    get: function() { return value.get(this, key); },
+                    set: function(val) { value.set(this, key, val); },
+                    enumerable: true
                 });
             }
             else

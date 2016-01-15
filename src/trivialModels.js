@@ -4,9 +4,14 @@
 /// @module
 //----------------------------------------------------------------------------------------------------------------------
 
+import _ from 'lodash';
+
 import BaseModel from './lib/baseModel';
 import errors from './lib/errors';
 import types from './lib/types';
+
+// Drivers
+import SimpleDriver from './drivers/simpleDriver';
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -22,13 +27,14 @@ function defineModel(definition)
 {
     var Model;
 
-    if(definition.name)
+    if(definition.name && _.isString(definition.name))
     {
+        // Sanitize the name a little bit; we don't allow: (, ), [, ], %, =, +, -, /, *, ;, ., or whitespace. If you can
+        // still break eval after this, I tip my hat to you.
+        var name = definition.name.replace(/[\(\)\[\]%=+-\/\*\s;\.]/g, '');
+
         // If the user passed in a name for the model, we respect that, otherwise we call it 'TrivialModel'.
-        Model = (new Function(
-            'BaseModel',
-            'return ' + buildModelClass.toString().replace(/TrivialModel/g, definition.name) + '()'
-        )(BaseModel));
+        Model = (eval('(' + buildModelClass.toString().replace(/TrivialModel/g, name) + ')()'));
     }
     else
     {
@@ -37,7 +43,7 @@ function defineModel(definition)
 
     Model.setSchema(definition.schema);
     Model.setDriver(definition.driver);
-    model.setPrimaryKey(definition.primaryKey);
+    Model.setPrimaryKey(definition.primaryKey);
 
     return Model;
 } // end defineModel
@@ -49,7 +55,18 @@ module.exports = {
     define: defineModel,
     BaseModel,
     errors,
-    types
+    types : {
+        String: (opts) => { return new types.String(opts); },
+        Number: (opts) => { return new types.Number(opts); },
+        Boolean: (opts) => { return new types.Boolean(opts); },
+        Date: (opts) => { return new types.Date(opts); },
+        Object: (opts) => { return new types.Object(opts); },
+        Array: (opts) => { return new types.Array(opts); },
+        Any: (opts) => { return new types.Any(opts); }
+    },
+    drivers: {
+        SimpleDriver
+    }
 };
 
 //----------------------------------------------------------------------------------------------------------------------
