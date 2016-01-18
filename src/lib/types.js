@@ -25,7 +25,6 @@ class BaseType
 
     get(inst, key)
     {
-        console.log('inst:', inst);
         var val = inst.$values[key];
         if(val === undefined)
         {
@@ -46,6 +45,14 @@ class BaseType
         var valid = true;
         var val = this.get(inst, key);
 
+        // Check for required. We do this before calling sanitize, because sanitize should never be able to override
+        // the `required` flag. This is an intentional decision to limit the utility of `sanitize`.
+        if((val === undefined || val === null) && this.options.required)
+        {
+            throw new errors.Required(key);
+        } // end if
+
+        // Give the user the option to sanitize the inputs
         if(this.$sanitize)
         {
             val = this.$sanitize(val, inst);
@@ -61,6 +68,17 @@ class BaseType
         if(valid && this.options.validate)
         {
             valid = this.options.validate.call(inst, val);
+
+            // We throw a more specific error if we fail validation
+            if(!valid)
+            {
+                throw new errors.CustomValidation(val);
+            } // end if
+        } // end if
+
+        if(!valid)
+        {
+            throw new errors.Validation(val, this);
         } // end if
 
         return valid;
@@ -74,15 +92,11 @@ class BaseType
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class AnyType extends BaseType {}
-
-//----------------------------------------------------------------------------------------------------------------------
-
 class StringType extends BaseType
 {
     $validate(val)
     {
-        if(!this.options.required && (val === null || val === undefined) ? true : _.isString(val))
+        if(_.isString(val))
         {
             return true;
         }
@@ -99,7 +113,7 @@ class NumberType extends BaseType
 {
     $validate(val)
     {
-        if(!this.options.required && (val === null || val === undefined) ? true : _.isNumber(val) && isFinite(val))
+        if(_.isNumber(val) && isFinite(val))
         {
             return true;
         }
@@ -114,14 +128,9 @@ class NumberType extends BaseType
 
 class BooleanType extends BaseType
 {
-    $sanitize(val)
-    {
-        return !!val;
-    } // end sanitize
-
     $validate(val)
     {
-        if(!this.options.required && (val === null || val === undefined) ? true : _.isBoolean(val))
+        if(_.isBoolean(val))
         {
             return true;
         }
@@ -138,15 +147,13 @@ class DateType extends BaseType
 {
     $validate(val)
     {
-        var oldVal = val;
-        val = new Date(val);
-        if(!this.options.required && (val === null || val === undefined) ? true : _.isDate(val))
+        if(_.isDate(val) && isFinite(val.getTime()))
         {
             return true;
         }
         else
         {
-            throw new errors.Validation(oldVal, this);
+            throw new errors.Validation(val, this);
         } // end if
     } // end validate
 
@@ -155,12 +162,17 @@ class DateType extends BaseType
         return new Date(super.get(inst, key));
     } // end get
 
-    set(inst, val)
+    set(inst, key, val)
     {
+        // Always attempt to cast to a Date.
         val = new Date(val);
 
-        // Dates are never stored as Date objects, but always unix timestamps under the hood.
-        return super.set(inst, val.getTime());
+        var timestamp = val.getTime();
+        if(isFinite(timestamp))
+        {
+            // Dates are never stored as Date objects, but always unix timestamps under the hood.
+            super.set(inst, key, timestamp);
+        } // end if
     } // end set
 } // end DateType
 
@@ -170,7 +182,7 @@ class ObjectType extends BaseType
 {
     $validate(val)
     {
-        if(!this.options.required && (val === null || val === undefined) ? true : _.isPlainObject(val))
+        if(_.isPlainObject(val))
         {
             return true;
         }
@@ -187,7 +199,7 @@ class ArrayType extends BaseType
 {
     $validate(val)
     {
-        if(!this.options.required && (val === null || val === undefined) ? true : _.isArray(val))
+        if(_.isArray(val))
         {
             return true;
         }
@@ -197,6 +209,10 @@ class ArrayType extends BaseType
         } // end if
     } // end validate
 } // end ArrayType
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class AnyType extends BaseType {}
 
 //----------------------------------------------------------------------------------------------------------------------
 

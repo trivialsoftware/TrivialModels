@@ -42,11 +42,33 @@ class MultipleDocumentsError extends BaseError
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class RequiredError extends BaseError
+{
+    constructor(key)
+    {
+        super(`'${key}' is required and cannot be undefined or null.`);
+        this.key = key;
+    } // end constructor
+} // end RequiredError
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class CustomValidationError extends BaseError
+{
+    constructor(val)
+    {
+        super(`Value '${JSON.stringify(val)}' failed custom validation.`);
+        this.value = val;
+    } // end constructor
+} // end CustomValidationError
+
+//----------------------------------------------------------------------------------------------------------------------
+
 class ValidationError extends BaseError
 {
     constructor(val, type)
     {
-        super(`Validation Failed: value '${val}' is not a valid '${type}'.`);
+        super(`Value '${JSON.stringify(val)}' is not a valid '${type}'.`);
         this.value = val;
         this.type = type;
     } // end constructor
@@ -66,11 +88,13 @@ class WriteDatabaseError extends BaseError
 
 //----------------------------------------------------------------------------------------------------------------------
 
-module.exports = {
+export default {
     NotImplemented: NotImplementedError,
     DocumentNotFound: DocumentNotFoundError,
     MultipleDocuments: MultipleDocumentsError,
+    Required: RequiredError,
     Validation: ValidationError,
+    CustomValidation: CustomValidationError,
     WriteDatabase: WriteDatabaseError
 };
 
