@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 
+import types from './types';
 import errors from './errors';
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -26,7 +27,7 @@ class TrivialModel {
             throw new Error("A driver must be set on the model.");
         } // end if
 
-        this.$dirty = false;
+        this.$dirty = true;
         this.$exists = false;
         this.$values = {};
 
@@ -46,7 +47,7 @@ class TrivialModel {
 
     $duplicate()
     {
-        return Promise.resolve(new this.constructor(this.$values));
+        return Promise.resolve(new this.constructor(_.cloneDeep(_.omit(this.$values, this.constructor.pk))));
     } // end $duplicate
 
     $reload()
@@ -57,11 +58,11 @@ class TrivialModel {
             {
                 if(_.isArray(results))
                 {
-                    throw new errors.MultipleDocuments(this.$pk, this.name);
+                    throw new errors.MultipleDocuments(this.$pk, this.constructor.name);
                 }
                 else if(!results)
                 {
-                    throw new errors.DocumentNotFound(this.$pk, this.name);
+                    throw new errors.DocumentNotFound(this.$pk, this.constructor.name);
                 }
                 else
                 {
@@ -77,15 +78,22 @@ class TrivialModel {
     $validate()
     {
         var schema = this.constructor.schema;
-        return Promise.props(schema, (value, key) =>
+
+        return new Promise((resolve) =>
+        {
+            _.mapValues(schema, (value, key) =>
             {
                 // We only run validation if it's a type from our type system.
                 if(value.$isType)
                 {
+                    // This will throw an exception if it fails to validate.
                     return value.validate(this, key);
                 } // end if
-            })
-            .then(() => true);
+            });
+
+            // If we get here, we're valid.
+            resolve(true);
+        });
     } // end $validate
 
     $save()
@@ -97,7 +105,6 @@ class TrivialModel {
                 return driver.set(this.$pk, this.$values, this)
                     .then((id) =>
                     {
-                        console.log('***id:', id);
                         this.$values[this.constructor.pk] = id;
                     })
                     .then(() =>
@@ -126,7 +133,7 @@ class TrivialModel {
         }
         else
         {
-            return Promise.throw(new Error("Cannot delete a model that has not been saved yet!"));
+            return Promise.reject(new Error("Cannot delete a model that has not been saved yet!"));
         } // end if
     } // end $delete
 
@@ -135,7 +142,6 @@ class TrivialModel {
         // Remove all keys that begin with `$`.
         function _filterObject(object)
         {
-            console.log('obj:', object);
             return _.transform(object, (results, value, key) =>
             {
                 if(_.isPlainObject(value))
@@ -144,7 +150,6 @@ class TrivialModel {
                 }
                 else if(!(typeof key === 'string' && key.charAt(0) === '$'))
                 {
-                    console.log('setting %s:%s', key, value);
                     results[key] = value;
                 } // end if
 
@@ -225,15 +230,8 @@ class TrivialModel {
     // Model Class creation API
     //------------------------------------------------------------------------------------------------------------------
 
-    static setPrimaryKey(pk)
-    {
-        this.pk = pk || 'id';
-    } // end setPrimaryKey
-
     static setSchema(schema)
     {
-        this.schema = schema;
-
         // Build the schema
         _.forIn(schema, (value, key) =>
         {
@@ -245,12 +243,35 @@ class TrivialModel {
                     set: function(val) { value.set(this, key, val); },
                     enumerable: true
                 });
+
+                if(value.isPrimaryKey)
+                {
+                    this.pk = key;
+                } // end if
             }
             else
             {
                 this.prototype[key] = value;
             } // end if
         });
+
+        // Ensure we always have a primary key
+        if(!this.pk)
+        {
+            this.pk = 'id';
+
+            // Add the id field to the schema
+            schema.id = new types.String({ pk: true });
+
+            // Build the getter/setter
+            Object.defineProperty(this.prototype, 'id', {
+                get: function() { return schema.id.get(this, 'id'); },
+                set: function(val) { schema.id.set(this, 'id', val); },
+                enumerable: true
+            });
+        } // end if
+
+        this.schema = schema;
     } // end setSchema
 
     static setDriver(driver)

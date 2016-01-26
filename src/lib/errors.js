@@ -22,7 +22,7 @@ class DocumentNotFoundError extends BaseError
 {
     constructor(id, modelName)
     {
-        super(`Document with id '${doc}' not found in model '${modelName}'.`);
+        super(`Document with id '${id}' not found in model '${modelName}'.`);
         this.id = id;
         this.model = modelName;
     } // end constructor
@@ -34,7 +34,7 @@ class MultipleDocumentsError extends BaseError
 {
     constructor(id, modelName)
     {
-        super(`Multiple documents returned with id '${doc}' in model '${modelName}'.`);
+        super(`Multiple documents returned with id '${id}' in model '${modelName}'.`);
         this.id = id;
         this.model = modelName;
     } // end constructor
