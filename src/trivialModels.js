@@ -12,6 +12,7 @@ import types from './lib/types';
 
 // Drivers
 import SimpleDriver from './drivers/simpleDriver';
+import TrivialDBDriver from './drivers/trivialdbDriver';
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -64,7 +65,8 @@ module.exports = {
         Any: (opts) => { return new types.Any(opts); }
     },
     drivers: {
-        SimpleDriver
+        SimpleDriver,
+        TrivialDBDriver
     }
 };
 
