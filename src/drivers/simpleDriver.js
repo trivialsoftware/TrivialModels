@@ -15,6 +15,11 @@ class SimpleDriver {
         this.db = {};
     } // end constructor
 
+    _genID()
+    {
+        return '' + Date.now();
+    } // end _genID
+
     get(pk, inst)
     {
         return Promise.resolve(this.db[pk]);
@@ -30,17 +35,17 @@ class SimpleDriver {
         if(arguments.length == 1)
         {
             value = pk;
-            pk = Date.now();
+            pk = this._genID();
         } // end if
 
         if(arguments.length == 2)
         {
             inst = value;
             value = pk;
-            pk = Date.now();
+            pk = this._genID();
         } // end if
 
-        pk = pk || Date.now();
+        pk = pk || this._genID();
 
         this.db[pk] = value;
         return Promise.resolve(pk);
