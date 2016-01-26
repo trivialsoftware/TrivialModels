@@ -47,6 +47,11 @@ class TrivialDBDriver {
         return Promise.resolve(this.db.filter(predicate));
     } // end filter
 
+    query(queryFunc, inst)
+    {
+        return Promise.resolve(queryFunc(this.db.query()));
+    } // end queryFun
+
     remove(predicate, inst)
     {
         return this.db.remove(predicate);

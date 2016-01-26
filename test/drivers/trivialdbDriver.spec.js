@@ -100,6 +100,29 @@ describe('TrivialDB Driver', () =>
         });
     });
 
+    describe('#query()', () =>
+    {
+        it('passes a query object into the query function', () =>
+        {
+            return driver.query((queryObj) =>
+            {
+                expect(queryObj).to.not.be.undefined;
+            });
+        });
+
+        it('allows for arbitrary querying of the database', () =>
+        {
+            return driver.query((query) =>
+                {
+                    return query.filter({ admin: true }).run();
+                })
+                .then((results) =>
+                {
+                    expect(results).to.deep.equal([driver.db.values.test2]);
+                });
+        });
+    });
+
     describe('#remove()', () =>
     {
         it('supports a simple predicate', () =>

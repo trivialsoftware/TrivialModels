@@ -423,6 +423,33 @@ describe('BaseModel', function()
             });
         });
 
+        describe('#query()', () =>
+        {
+            it('allows for arbitrary querying of the database', () =>
+            {
+                return TestModel.query((query) =>
+                    {
+                        return query.filter({ admin: false }).run();
+                    })
+                    .then((models) =>
+                    {
+                        expect(models.length).to.equal(2);
+                    });
+            });
+
+            it('returns model instances for all returned items', () =>
+            {
+                return TestModel.query((query) =>
+                    {
+                        return query.filter({ admin: false }).run();
+                    })
+                    .then((models) =>
+                    {
+                        expect(models[0]).to.be.instanceOf(TestModel);
+                    });
+            });
+        });
+
         describe('#remove()', () =>
         {
             it('removes items from the database, based on a lodash style predicate', () =>

@@ -56,6 +56,11 @@ class SimpleDriver {
         return Promise.resolve(_(this.db).values().filter(predicate).run());
     } // end filter
 
+    query(queryFunc, inst)
+    {
+        return Promise.resolve(queryFunc(_(this.db)));
+    } // end queryFun
+
     remove(predicate, inst)
     {
         return Promise.resolve(_(this.db).keys().reduce((results, pk) =>

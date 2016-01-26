@@ -216,6 +216,15 @@ class TrivialModel {
             });
     } // end filter
 
+    static query(queryFunc)
+    {
+        return this.driver.query(queryFunc, this)
+            .map((item) =>
+            {
+                return this._makeModel(item);
+            });
+    } // end query
+
     static remove(predicate)
     {
         return this.driver.remove(predicate, this);
