@@ -43,7 +43,6 @@ function defineModel(definition)
 
     Model.setSchema(definition.schema);
     Model.setDriver(definition.driver);
-    Model.setPrimaryKey(definition.primaryKey);
 
     return Model;
 } // end defineModel

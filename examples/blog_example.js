@@ -17,10 +17,9 @@ var types = trivialModels.types;
 var Author = trivialModels.define({
     name: 'Author',
     driver: new SimpleDriver(),
-    primaryKey: 'email',
     schema: {
         name: types.String(),
-        email: types.String(),
+        email: types.String({ pk: true }),
         admin: types.Boolean({ default: false })
     }
 });
@@ -87,17 +86,29 @@ Promise.resolve()
     {
         console.log('Save Test:');
 
-        var post = new Post({
-            title: "My Test",
-            content: "My battle with writing posts.",
-            author: 'chris.case@g33xnexus.com'
+        var author = new Author({
+            name: 'Test Author',
+            email: 'test@foo.com',
+            admin: false
         });
 
-        return post.$save()
-            .then((post) =>
+        return author.$save()
+            .then(() =>
             {
-                console.log('  Created post: %s', util.inspect(post, { colors: true }));
-                console.log('  Created post: %s', util.inspect(JSON.stringify(post), { colors: true }));
+                console.log('  Author: %s', util.inspect(JSON.stringify(author), { colors: true }))
+
+                var post = new Post({
+                    title: "My Test",
+                    content: "My battle with writing posts.",
+                    author: author.$pk
+                });
+
+                return post.$save()
+                    .then((post) =>
+                    {
+                        console.log('  Created post: %s', util.inspect(post, { colors: true }));
+                        console.log('  Created post: %s', util.inspect(JSON.stringify(post), { colors: true }));
+                    });
             });
     });
 

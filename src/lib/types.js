@@ -23,6 +23,8 @@ class BaseType
         } // end if
     } // end constructor
 
+    get isPrimaryKey(){ return this.options.pk || this.options.primaryKey; }
+
     get(inst, key)
     {
         var val = inst.$values[key];
@@ -47,9 +49,18 @@ class BaseType
 
         // Check for required. We do this before calling sanitize, because sanitize should never be able to override
         // the `required` flag. This is an intentional decision to limit the utility of `sanitize`.
-        if((val === undefined || val === null) && this.options.required)
+        if(val === undefined || val === null)
         {
-            throw new errors.Required(key);
+            // Primary keys are _never_ required for validation.
+            if(this.options.required && !this.options.pk)
+            {
+                throw new errors.Required(key);
+            }
+            else
+            {
+                // Our values are undefined or null, but we're not a required field, so we return valid.
+                return true;
+            } // end if
         } // end if
 
         // Give the user the option to sanitize the inputs
