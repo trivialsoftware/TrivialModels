@@ -114,7 +114,7 @@ describe('TrivialDB Driver', () =>
         {
             return driver.query((query) =>
                 {
-                    return query.filter({ admin: true }).run();
+                    return query.filter({ admin: true }).value();
                 })
                 .then((results) =>
                 {
