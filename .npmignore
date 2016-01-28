@@ -1,0 +1,19 @@
+# Editor artifacts
+**.swp
+
+# NPM cruft
+node_modules
+**.log
+
+# Jetbrains IDE project files
+.idea
+
+# Ignore source files
+.babelrc
+.eslintrc
+.gitignore
+*.yml
+Gruntfile.js
+src
+examples
+tests
