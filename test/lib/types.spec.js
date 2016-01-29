@@ -226,6 +226,16 @@ describe('Types', () =>
                 expect(DateType.get(inst, 'test2')).to.be.instanceOf(Date);
                 expect(DateType.get(inst, 'test3')).to.be.instanceOf(Date);
             });
+
+            it('returns the current timestamp if the `auto` option is set, and no value for the field exists', () =>
+            {
+                inst.$values = {}
+                DateType.options.auto = true;
+
+                expect(DateType.get(inst, 'test')).to.be.instanceOf(Date);
+                expect(typeof (DateType.get(inst, 'test').getTime())).to.equal('number');
+                expect(Date.now() - DateType.get(inst, 'test').getTime()).to.be.closeTo(0, 1);
+            });
         });
 
         describe('#set', () =>

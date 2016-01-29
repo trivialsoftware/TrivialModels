@@ -170,7 +170,14 @@ class DateType extends BaseType
 
     get(inst, key)
     {
-        return new Date(super.get(inst, key));
+        var ts = super.get(inst, key);
+
+        if(ts === undefined && this.options.auto)
+        {
+            ts = Date.now();
+        } // end if
+
+        return new Date(ts);
     } // end get
 
     set(inst, key, val)
