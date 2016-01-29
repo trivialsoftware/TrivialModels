@@ -24,8 +24,6 @@ class TrivialDBDriver {
     {
         this.options.pk = model.pk;
 
-        console.log('pk:', this.options.pk);
-
         if(this.options.namespace)
         {
             var nsName = this.options.namespace.name;
