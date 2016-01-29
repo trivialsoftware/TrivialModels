@@ -10,6 +10,10 @@ import Promise from 'bluebird';
 import types from './types';
 import errors from './errors';
 
+// Drivers
+import SimpleDriver from '../drivers/simpleDriver';
+import TrivialDBDriver from '../drivers/trivialdbDriver';
+
 //----------------------------------------------------------------------------------------------------------------------
 
 class TrivialModel {
@@ -285,6 +289,40 @@ class TrivialModel {
 
     static setDriver(driver)
     {
+        if(driver == undefined)
+        {
+            throw new Error("Driver not specified.");
+        } // end if
+
+        if(_.isString(driver))
+        {
+            driver = { name: driver };
+        } // end if
+
+        if(_.isPlainObject(driver) && driver.name)
+        {
+            var DriverClass;
+            switch(driver.name)
+            {
+                case 'Simple':
+                    DriverClass = SimpleDriver;
+                    break;
+
+                case 'TrivialDB':
+                    DriverClass = TrivialDBDriver;
+                    break;
+
+                default:
+                    throw new Error(`Unknown Driver '${ driver.name }'!`);
+                    break;
+            } // end switch
+
+            driver = new DriverClass(driver.options);
+        } // end if
+
+        // Initialize the driver
+        driver.init(this);
+
         this.driver = driver;
     } // end setDriver
 } // end TrivialModel

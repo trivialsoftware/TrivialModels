@@ -7,7 +7,6 @@
 var util = require('util');
 var trivialModels = require('../dist/trivialModels');
 
-var SimpleDriver = trivialModels.drivers.SimpleDriver;
 var types = trivialModels.types;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16,7 +15,13 @@ var types = trivialModels.types;
 
 var Author = trivialModels.define({
     name: 'Author',
-    driver: new SimpleDriver(),
+    driver: {
+        name: 'TrivialDB',
+        options: {
+            name: 'authors',
+            writeToDisk: false
+        }
+    },
     schema: {
         name: types.String(),
         email: types.String({ pk: true }),
@@ -26,7 +31,13 @@ var Author = trivialModels.define({
 
 var Post = trivialModels.define({
     name: 'Post',
-    driver: new SimpleDriver(),
+    driver: {
+        name: 'TrivialDB',
+        options: {
+            name: 'posts',
+            writeToDisk: false
+        }
+    },
     schema: {
         title: types.String({ required: true }),
         content: types.String({ required: true }),
@@ -37,7 +48,7 @@ var Post = trivialModels.define({
 //----------------------------------------------------------------------------------------------------------------------
 
 // Populate the database
-Author.driver.db = {
+Author.driver.db.values = {
     'chris.case@g33xnexus.com': {
         name: 'Chris Case',
         email: 'chris.case@g33xnexus.com',
@@ -50,7 +61,7 @@ Author.driver.db = {
     }
 };
 
-Post.driver.db = {
+Post.driver.db.values = {
     '1452637592827': {
         title: "Posts, and the people who post them.",
         content: "Placeholder text. For the future!",

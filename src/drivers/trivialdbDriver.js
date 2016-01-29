@@ -11,53 +11,73 @@ import trivialdb from 'trivialdb';
 //----------------------------------------------------------------------------------------------------------------------
 
 class TrivialDBDriver {
-    constructor(name, options)
+    constructor(options)
     {
-        options = options || {};
+        this.options = options || {};
+    } // end constructor
 
-        if(options.namespace)
+    //------------------------------------------------------------------------------------------------------------------
+    // Driver API
+    //------------------------------------------------------------------------------------------------------------------
+
+    init(model)
+    {
+        this.options.pk = model.pk;
+
+        console.log('pk:', this.options.pk);
+
+        if(this.options.namespace)
         {
-            var namespace = trivialdb.ns(options.namespace.name, options.namespace);
-            this.db = namespace.db(name, _.omit(options, 'namespace'));
+            var nsName = this.options.namespace.name;
+            var nsOpts = _.omit(this.options.namespace, 'name');
+
+            if(_.isString(his.options.namespace))
+            {
+                nsName = this.options.namespace;
+                nsOpts = undefined;
+            } // end if
+
+            var namespace = trivialdb.ns(nsName, nsOpts);
+            this.db = namespace.db(this.options.name, _.omit(this.options, ['namespace', 'name']));
         }
         else
         {
-            this.db = trivialdb.db(name, options);
+            this.db = trivialdb.db(this.options.name, _.omit(this.options, ['name']));
         } // end if
-    } // end constructor
+    } // end init
 
-    get(pk, inst)
+    get(pk)
     {
         return this.db.load(pk)
             .catch(trivialdb.errors.DocumentNotFound, () => undefined);
     } // end get
 
-    getAll(inst)
+    getAll()
     {
         return Promise.resolve(this.db.filter({}));
     } // end getAll
 
-    set(pk, value, inst)
+    set(pk, value)
     {
         return this.db.save(pk, value);
     } // end set
 
-    filter(predicate, inst)
+    filter(predicate)
     {
         return Promise.resolve(this.db.filter(predicate));
     } // end filter
 
-    query(queryFunc, inst)
+    query(queryFunc)
     {
         return Promise.resolve(queryFunc(this.db.query()));
     } // end queryFun
 
-    remove(predicate, inst)
+    remove(predicate)
     {
         return this.db.remove(predicate);
     } // end remove
 
-    removeAll(inst)
+    removeAll()
     {
         this.db.values = {};
         return this.db.sync();

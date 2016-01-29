@@ -229,7 +229,7 @@ describe('Types', () =>
 
             it('returns the current timestamp if the `auto` option is set, and no value for the field exists', () =>
             {
-                inst.$values = {}
+                inst.$values = {};
                 DateType.options.auto = true;
 
                 expect(DateType.get(inst, 'test')).to.be.instanceOf(Date);

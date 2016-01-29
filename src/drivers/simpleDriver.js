@@ -20,17 +20,23 @@ class SimpleDriver {
         return '' + Date.now();
     } // end _genID
 
-    get(pk, inst)
+    //------------------------------------------------------------------------------------------------------------------
+    // Driver API
+    //------------------------------------------------------------------------------------------------------------------
+
+    init(){}
+
+    get(pk /*, inst*/)
     {
         return Promise.resolve(this.db[pk]);
     } // end get
 
-    getAll(inst)
+    getAll(/*inst*/)
     {
         return Promise.resolve(_.values(this.db));
     } // end getAll
 
-    set(pk, value, inst)
+    set(pk, value/*, inst*/)
     {
         if(arguments.length == 1)
         {
@@ -40,7 +46,7 @@ class SimpleDriver {
 
         if(arguments.length == 2)
         {
-            inst = value;
+            //inst = value;
             value = pk;
             pk = this._genID();
         } // end if
@@ -51,17 +57,17 @@ class SimpleDriver {
         return Promise.resolve(pk);
     } // end set
 
-    filter(predicate, inst)
+    filter(predicate /*, inst*/)
     {
         return Promise.resolve(_(this.db).values().filter(predicate).run());
     } // end filter
 
-    query(queryFunc, inst)
+    query(queryFunc /*, inst*/)
     {
         return Promise.resolve(queryFunc(_(this.db)));
     } // end queryFun
 
-    remove(predicate, inst)
+    remove(predicate /*, inst*/)
     {
         return Promise.resolve(_(this.db).keys().reduce((results, pk) =>
             {
@@ -86,7 +92,7 @@ class SimpleDriver {
             });
     } // end remove
 
-    removeAll(inst)
+    removeAll(/*inst*/)
     {
         this.db = {};
         return Promise.resolve();

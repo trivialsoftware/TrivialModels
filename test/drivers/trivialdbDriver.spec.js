@@ -15,7 +15,9 @@ describe('TrivialDB Driver', () =>
     var driver;
     beforeEach(() =>
     {
-        driver = new TrivialDBDriver('test', { writeToDisk: false });
+        driver = new TrivialDBDriver({ name: 'test', writeToDisk: false });
+        driver.init({});
+
         driver.db.values = {
             'test1': { name: 'Test 1', admin: false, id: 'test1' },
             'test2': { name: 'Test 2', admin: true, id: 'test2' },
@@ -137,7 +139,7 @@ describe('TrivialDB Driver', () =>
         it('supports a predicate function', () =>
         {
             return driver.remove((item) => !!item.admin)
-                .then((removed) =>
+                .then(() =>
                 {
                     expect(driver.db.values.test2).to.be.undefined;
                 });

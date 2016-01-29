@@ -10,10 +10,6 @@ import BaseModel from './lib/baseModel';
 import errors from './lib/errors';
 import types from './lib/types';
 
-// Drivers
-import SimpleDriver from './drivers/simpleDriver';
-import TrivialDBDriver from './drivers/trivialdbDriver';
-
 //----------------------------------------------------------------------------------------------------------------------
 
 function buildModelClass()
@@ -63,10 +59,6 @@ module.exports = {
         Object: (opts) => { return new types.Object(opts); },
         Array: (opts) => { return new types.Array(opts); },
         Any: (opts) => { return new types.Any(opts); }
-    },
-    drivers: {
-        SimpleDriver,
-        TrivialDBDriver
     }
 };
 
