@@ -161,7 +161,9 @@ class TrivialModel {
             });
         } // end _filterObject
 
-        return _filterObject(this.$values);
+        var schema = _filterObject(this.constructor.schema);
+
+        return _.transform(schema, (results, value, key) => { results[key] = this[key]; });
     } // end toJSON
 
     //------------------------------------------------------------------------------------------------------------------

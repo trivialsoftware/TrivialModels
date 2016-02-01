@@ -22,6 +22,7 @@ describe('BaseModel', function()
     var schema = {
         name: new types.String(),
         email: new types.String({ validate: (email) => { return _.contains(email, '@'); } }),
+        foobar: new types.String({ default: 'apples' }),
         admin: new types.Boolean({ default: true })
     };
 
@@ -36,6 +37,7 @@ describe('BaseModel', function()
             test: {
                 name: "Test Inst",
                 email: "test@foo.com",
+                foobar: 'bar',
                 admin: true,
                 id: 'test'
             },
@@ -329,6 +331,16 @@ describe('BaseModel', function()
             {
                 var jsonObj = testInst.toJSON();
                 expect(jsonObj).to.deep.equal(TestModel.driver.db.test);
+            });
+
+            it('contains default values', () =>
+            {
+                var defaultTestInst = new TestModel(TestModel.driver.db.test1);
+                defaultTestInst.$dirty = false;
+                defaultTestInst.$exists = true;
+
+                var jsonObj = defaultTestInst.toJSON();
+                expect(jsonObj.foobar).to.equal('apples');
             });
         });
     });
