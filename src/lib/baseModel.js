@@ -225,6 +225,7 @@ class TrivialModel {
     static query(queryFunc)
     {
         return this.driver.query(queryFunc, this)
+            .then((items) => { return _.filter(items, (item) => _.isPlainObject(item) && !_.isEmpty(item)); })
             .map((item) =>
             {
                 return this._makeModel(item);

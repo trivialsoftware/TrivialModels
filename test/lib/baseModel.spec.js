@@ -449,14 +449,21 @@ describe('BaseModel', function()
                     });
             });
 
-            it('returns model instances for all returned items', () =>
+            it('returns model instances for all returned, non-empty object items', () =>
             {
                 return TestModel.query((query) =>
                     {
-                        return query.filter({ admin: false }).run();
+                        var items = query.filter({ admin: false }).run();
+                        items.push(undefined);
+                        items.push(79000.245);
+                        items.push('foobars!');
+                        items.push('{}');
+
+                        return items;
                     })
                     .then((models) =>
                     {
+                        expect(models.length).to.equal(2);
                         expect(models[0]).to.be.instanceOf(TestModel);
                     });
             });
