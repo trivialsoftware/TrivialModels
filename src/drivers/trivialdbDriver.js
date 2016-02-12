@@ -29,7 +29,7 @@ class TrivialDBDriver {
             var nsName = this.options.namespace.name;
             var nsOpts = _.omit(this.options.namespace, 'name');
 
-            if(_.isString(his.options.namespace))
+            if(_.isString(this.options.namespace))
             {
                 nsName = this.options.namespace;
                 nsOpts = undefined;
