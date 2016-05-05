@@ -307,6 +307,42 @@ describe('Types', () =>
                 expect(ObjectType.validate(inst, 'test')).to.equal(true);
                 expect(() => ObjectType.validate(inst, 'test2')).to.throw(errors.Validation);
             });
+            
+            it('supports the `schema` option', () =>
+            {
+                ObjectType = new types.Object({
+                    schema: {
+                        num: new types.Number(),
+                        name: new types.String({ required: true })
+                    }
+                });
+
+                inst.$values = {
+                    test: {
+                        num: 12345,
+                        name: 'foobar'
+                    },
+                    test2: {
+                        num: 12345,
+                        name: 'foobar',
+                        other: 'apples'
+                    },
+                    test3: {
+                        num: 2345
+                    },
+                    test4: {
+                        num: '???',
+                        name: 'omgbbq'
+                    },
+                    test5: {}
+                };
+
+                expect(ObjectType.validate(inst, 'test')).to.equal(true);
+                expect(ObjectType.validate(inst, 'test2')).to.equal(true);
+                expect(() => ObjectType.validate(inst, 'test3')).to.throw(errors.Required);
+                expect(() => ObjectType.validate(inst, 'test4')).to.throw(errors.Validation);
+                expect(() => ObjectType.validate(inst, 'test5')).to.throw(errors.Required);
+            });
         });
     });
 

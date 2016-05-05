@@ -209,6 +209,20 @@ class ObjectType extends BaseType
     {
         if(_.isPlainObject(val))
         {
+            // Support nested schemas
+            if(this.options.schema)
+            {
+                _.mapValues(this.options.schema, (value, key) =>
+                {
+                    // We only run validation if it's a type from our type system.
+                    if(value.$isType)
+                    {
+                        // This will throw an exception if it fails to validate.
+                        return value.validate({ $values: val }, key);
+                    } // end if
+                });
+            } // end if
+            
             return true;
         }
         else
