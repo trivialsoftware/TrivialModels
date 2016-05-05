@@ -126,7 +126,14 @@ class NumberType extends BaseType
     {
         if(_.isNumber(val) && isFinite(val))
         {
-            return true;
+            if(this.options.integer && !Number.isInteger(val))
+            {
+                throw new errors.Validation(val, this, `'${ val }' is not a valid integer.`);
+            }
+            else
+            {
+                return true;
+            } // end if
         }
         else
         {
@@ -230,6 +237,24 @@ class ArrayType extends BaseType
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class EnumType extends BaseType
+{
+    $validate(val)
+    {
+        var choices = this.options.values || [];
+        if(_.contains(choices, val))
+        {
+            return true;
+        }
+        else
+        {
+            throw new errors.Validation(val, this, `'${ val }' must be one of: ${ this.options.values.join(', ') }`);
+        } // end if
+    } // end validate
+} // end EnumType
+
+//----------------------------------------------------------------------------------------------------------------------
+
 class AnyType extends BaseType {}
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -242,6 +267,7 @@ export default {
     Date: DateType,
     Object: ObjectType,
     Array: ArrayType,
+    Enum: EnumType,
     Any: AnyType
 };
 

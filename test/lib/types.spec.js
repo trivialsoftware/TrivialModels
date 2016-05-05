@@ -15,17 +15,19 @@ var errors = require('../../src/lib/errors').default;
 describe('Types', () =>
 {
     var inst;
-    var BaseType, StringType, NumberType, BooleanType, DateType, ObjectType, ArrayType, AnyType;
+    var BaseType, StringType, NumberType, IntegerType, BooleanType, DateType, ObjectType, ArrayType, EnumType, AnyType;
 
     beforeEach(() =>
     {
         BaseType = new types.Base();
         StringType = new types.String();
         NumberType = new types.Number();
+        IntegerType = new types.Number({ integer: true });
         BooleanType = new types.Boolean();
         DateType = new types.Date();
         ObjectType = new types.Object();
         ArrayType = new types.Array();
+        EnumType = new types.Enum({ values: ['foo', 'bar'] });
         AnyType = new types.Any();
 
         inst = { $values: { test: { foo: 123} } };
@@ -178,6 +180,19 @@ describe('Types', () =>
                 expect(NumberType.validate(inst, 'test2')).to.equal(true);
                 expect(() => NumberType.validate(inst, 'test3')).to.throw(errors.Validation);
             });
+            
+            it('supports restricting to integer', () =>
+            {
+                inst.$values = {
+                    test: 1234567890,
+                    test2: 12345.67890,
+                    test3: '1234567890'
+                };
+
+                expect(IntegerType.validate(inst, 'test')).to.equal(true);
+                expect(() => IntegerType.validate(inst, 'test2')).to.throw(errors.Validation);
+                expect(() => IntegerType.validate(inst, 'test3')).to.throw(errors.Validation);
+            });
         });
     });
 
@@ -312,6 +327,28 @@ describe('Types', () =>
 
                 expect(ArrayType.validate(inst, 'test')).to.equal(true);
                 expect(() => ArrayType.validate(inst, 'test2')).to.throw(errors.Validation);
+            });
+        });
+    });
+    
+    describe('EnumType', () =>
+    {
+        it('casts to the string \'EnumType\'', () =>
+        {
+            expect(EnumType.toString()).to.equal('EnumType');
+        });
+
+        describe('#validate()', () =>
+        {
+            it('only validates to specific values', () =>
+            {
+                inst.$values = {
+                    test: 'foo',
+                    test2: 'cat'
+                };
+
+                expect(EnumType.validate(inst, 'test')).to.equal(true);
+                expect(() => EnumType.validate(inst, 'test2')).to.throw(errors.Validation);
             });
         });
     });
