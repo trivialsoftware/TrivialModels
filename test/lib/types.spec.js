@@ -15,14 +15,13 @@ var errors = require('../../src/lib/errors').default;
 describe('Types', () =>
 {
     var inst;
-    var BaseType, StringType, NumberType, IntegerType, BooleanType, DateType, ObjectType, ArrayType, EnumType, AnyType;
+    var BaseType, StringType, NumberType, BooleanType, DateType, ObjectType, ArrayType, EnumType, AnyType;
 
     beforeEach(() =>
     {
         BaseType = new types.Base();
         StringType = new types.String();
         NumberType = new types.Number();
-        IntegerType = new types.Number({ integer: true });
         BooleanType = new types.Boolean();
         DateType = new types.Date();
         ObjectType = new types.Object();
@@ -183,6 +182,8 @@ describe('Types', () =>
             
             it('supports restricting to integer', () =>
             {
+                var IntegerType = new types.Number({ integer: true });
+                
                 inst.$values = {
                     test: 1234567890,
                     test2: 12345.67890,
