@@ -66,9 +66,9 @@ class CustomValidationError extends BaseError
 
 class ValidationError extends BaseError
 {
-    constructor(val, type)
+    constructor(val, type, errorMsg)
     {
-        super(`Value '${JSON.stringify(val)}' is not a valid '${type}'.`);
+        super(errorMsg ? errorMsg : `Value '${JSON.stringify(val)}' is not a valid '${type}'.`);
         this.value = val;
         this.type = type;
     } // end constructor
