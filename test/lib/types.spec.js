@@ -365,6 +365,30 @@ describe('Types', () =>
                 expect(ArrayType.validate(inst, 'test')).to.equal(true);
                 expect(() => ArrayType.validate(inst, 'test2')).to.throw(errors.Validation);
             });
+            
+            it('validates the type of array elements', () =>
+            {
+                ArrayType = new types.Array({ type: new types.String() });
+                
+                inst.$values = {
+                    test: [],
+                    test2: ['1234567890', 'apples', 'foobar'],
+                    test3: [1234567890, 'apples', 'foobar'],
+                    test4: [{ foo: 'bar' }, { foo: 'apples' }],
+                    test5: [{ foo: 'bar' }, { foo: 12345 }]
+                };
+
+                expect(ArrayType.validate(inst, 'test')).to.equal(true);
+                expect(ArrayType.validate(inst, 'test2')).to.equal(true);
+                expect(() => ArrayType.validate(inst, 'test3')).to.throw(errors.Validation);
+                
+                // Test Objects
+                ArrayType = new types.Array({ type: new types.Object({ schema: { foo: new types.String() } }) });
+                
+                expect(ArrayType.validate(inst, 'test4')).to.equal(true);
+                expect(() => ArrayType.validate(inst, 'test5')).to.throw(errors.Validation);
+                
+            });
         });
     });
     

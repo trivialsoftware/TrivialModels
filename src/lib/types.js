@@ -240,6 +240,17 @@ class ArrayType extends BaseType
     {
         if(_.isArray(val))
         {
+            // Support type checking
+            var type = this.options.type;
+            if(type && type.$isType)
+            {
+                return _.all(val, (item) =>
+                {
+                    // This will throw an exception if it fails to validate.
+                    return type.validate({ $values: { item } }, 'item');
+                });
+            } // end if
+            
             return true;
         }
         else
