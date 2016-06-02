@@ -1,6 +1,6 @@
 {
   "name": "trivialmodels",
-  "version": "1.0.0-beta.8",
+  "version": "1.0.0-beta.9",
   "description": "A trivial javascript model system, designed to be easy to build backends for.",
   "main": "dist/trivialModels.js",
   "dependencies": {
