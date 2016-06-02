@@ -58,6 +58,7 @@ module.exports = {
         Date: (opts) => { return new types.Date(opts); },
         Object: (opts) => { return new types.Object(opts); },
         Array: (opts) => { return new types.Array(opts); },
+        Enum: (opts) => { return new types.Enum(opts); },
         Any: (opts) => { return new types.Any(opts); }
     }
 };
