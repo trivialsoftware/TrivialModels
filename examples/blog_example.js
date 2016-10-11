@@ -41,7 +41,19 @@ var Post = trivialModels.define({
     schema: {
         title: types.String({ required: true }),
         content: types.String({ required: true }),
-        author: types.String({ required: true })
+        author: types.String({ required: true }),
+
+        // This is a virtual property. It is included in the JSON representation.
+        get test()
+        {
+            return 'TEEEEEST!'
+        },
+
+        // This is a function. It can access the model instance, but is stripped from the JSON representation.
+        foobar()
+        {
+            return 'Apples? ' + this.test;
+        }
     }
 });
 
@@ -117,6 +129,7 @@ Promise.resolve()
                 return post.$save()
                     .then((post) =>
                     {
+                        console.log('  Post function: %s', post.foobar());
                         console.log('  Created post: %s', util.inspect(post, { colors: true }));
                         console.log('  Created post: %s', util.inspect(JSON.stringify(post), { colors: true }));
                     });
